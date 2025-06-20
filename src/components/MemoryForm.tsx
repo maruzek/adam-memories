@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
-type MemoryType = "text" | "image" | "video" | "link";
+type MemoryType = "text" | "upload" | "link";
 
 function resizeImage(
   file: File,
@@ -57,7 +57,7 @@ function resizeImage(
 export function MemoryForm({ onSuccess }: { onSuccess: () => void }) {
   const [content, setContent] = useState("");
   const [type, setType] = useState<MemoryType>("text");
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]); // <-- array of files
   const [link, setLink] = useState("");
   const [uploading, setUploading] = useState(false);
   const sendMemory = useMutation(api.memories.send);
@@ -65,69 +65,63 @@ export function MemoryForm({ onSuccess }: { onSuccess: () => void }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((type === "image" || type === "video") && !file) {
-      alert("Please select a file to upload.");
+    if (type === "upload" && files.length === 0) {
+      alert("Prosím, přidejte alespoň jeden soubor k nahrání.");
       return;
     }
     if (type === "link" && !link) {
-      alert("Please enter a link to embed.");
+      alert("Prosím, vložte platný odkaz.");
       return;
     }
     if (type === "text" && !content) {
-      alert("Please enter your message.");
+      alert("Prosím, napište svou zprávu.");
       return;
     }
-    if (type === "image" && file) {
+
+    const fileIds: string[] = [];
+    const fileTypes: string[] = [];
+
+    if (type === "upload" && files.length > 0) {
       setUploading(true);
-      // Optimize image before upload
-      const optimizedBlob = await resizeImage(file);
-      const uploadUrl = await generateUploadUrl();
-      const res = await fetch(uploadUrl, {
-        method: "POST",
-        headers: { "Content-Type": "image/jpeg" },
-        body: optimizedBlob,
-      });
-      if (res.ok) {
-        const { storageId } = await res.json();
-        await sendMemory({
-          content,
-          type,
-          fileId: storageId,
-          link: link || undefined,
+      for (const file of files) {
+        let uploadFile = file;
+        if (file.type.startsWith("image/")) {
+          // Optimize image before upload
+          uploadFile = await resizeImage(file);
+        }
+        const uploadUrl = await generateUploadUrl();
+        const res = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": file.type },
+          body: uploadFile,
         });
-      } else {
-        alert("File upload failed");
-        setUploading(false);
-        return;
+        if (res.ok) {
+          const { storageId } = await res.json();
+          fileIds.push(storageId);
+          fileTypes.push(file.type);
+        } else {
+          alert("File upload failed");
+          setUploading(false);
+          return;
+        }
       }
       setUploading(false);
-    } else if (type === "video" && file) {
-      setUploading(true);
-      const uploadUrl = await generateUploadUrl();
-      const res = await fetch(uploadUrl, {
-        method: "POST",
-        headers: { "Content-Type": file.type },
-        body: file,
+      await sendMemory({
+        content,
+        type: "image", // treat as image/video for backend
+        fileIds,
+        fileTypes,
+        link: link || undefined,
       });
-      if (res.ok) {
-        const { storageId } = await res.json();
-        await sendMemory({
-          content,
-          type,
-          fileId: storageId,
-          link: link || undefined,
-        });
-      } else {
-        alert("File upload failed");
-        setUploading(false);
-        return;
-      }
-      setUploading(false);
     } else {
-      await sendMemory({ content, type, link: link || undefined });
+      await sendMemory({
+        content,
+        type: type === "upload" ? "image" : type,
+        link: link || undefined,
+      });
     }
     setContent("");
-    setFile(null);
+    setFiles([]);
     setLink("");
     onSuccess();
   };
@@ -135,20 +129,20 @@ export function MemoryForm({ onSuccess }: { onSuccess: () => void }) {
   const getPlaceholder = () => {
     switch (type) {
       case "link":
-        return "Paste a link to embed (e.g. YouTube, SoundCloud, etc.)";
+        return "Vložte odkaz na video, obrázek nebo jiný obsah...";
       case "text":
-        return "Write your message for Adam...";
+        return "Zde můžete napsat svou zprávu pro Adama...";
       default:
-        return "(Optional) Add a message for Adam...";
+        return "Zde můžete přidat zprávu k nahraným fotkám nebo videím...";
     }
   };
 
   return (
     <Card className="w-full max-w-lg mx-auto">
       <CardHeader>
-        <CardTitle>Share a Memory with Adam</CardTitle>
+        <CardTitle>Podělte se o svou vzpomínku s Adamem</CardTitle>
         <CardDescription>
-          Your message will be a great source of strength.
+          Vaše zpráva bude pro Adama velkou oporou.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -157,32 +151,36 @@ export function MemoryForm({ onSuccess }: { onSuccess: () => void }) {
             value={type}
             onValueChange={(value) => {
               setType(value as MemoryType);
-              setFile(null);
+              setFiles([]);
               setContent("");
               setLink("");
             }}
           >
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="text">Message</TabsTrigger>
-              <TabsTrigger value="image">Image</TabsTrigger>
-              <TabsTrigger value="video">Video</TabsTrigger>
-              <TabsTrigger value="link">Link</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="text">Zpráva</TabsTrigger>
+              <TabsTrigger value="upload">Nahrát fotky/videa</TabsTrigger>
+              <TabsTrigger value="link">Odkaz</TabsTrigger>
             </TabsList>
           </Tabs>
           <div className="grid w-full items-center gap-4 pt-4">
-            {(type === "image" || type === "video") && (
+            {type === "upload" && (
               <div className="flex flex-col space-y-1.5">
                 <Input
                   id="file"
                   type="file"
-                  accept={type === "image" ? "image/*" : "video/*"}
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  accept="image/*,video/*"
+                  multiple
+                  onChange={(e) =>
+                    setFiles(e.target.files ? Array.from(e.target.files) : [])
+                  }
                   className="mb-4"
                 />
-                {file && (
-                  <span className="text-xs text-gray-500">{file.name}</span>
+                {files.length > 0 && (
+                  <span className="text-xs text-gray-500">
+                    {files.map((f) => f.name).join(", ")}
+                  </span>
                 )}
-                <Label htmlFor="content">(Optional) Message</Label>
+                <Label htmlFor="content">Zpráva</Label>
                 <Textarea
                   id="content"
                   value={content}
@@ -193,7 +191,7 @@ export function MemoryForm({ onSuccess }: { onSuccess: () => void }) {
             )}
             {type === "text" && (
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="content">Your Message</Label>
+                <Label htmlFor="content">Vaše zpráva</Label>
                 <Textarea
                   id="content"
                   value={content}
@@ -204,7 +202,7 @@ export function MemoryForm({ onSuccess }: { onSuccess: () => void }) {
             )}
             {type === "link" && (
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="link">Link to Embed</Label>
+                <Label htmlFor="link">Odkaz k vložení</Label>
                 <Input
                   id="link"
                   type="url"
@@ -212,18 +210,18 @@ export function MemoryForm({ onSuccess }: { onSuccess: () => void }) {
                   onChange={(e) => setLink(e.target.value)}
                   placeholder={getPlaceholder()}
                 />
-                <Label htmlFor="content">(Optional) Message</Label>
+                <Label htmlFor="content">Zpráva</Label>
                 <Textarea
                   id="content"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="(Optional) Add a message for Adam..."
+                  placeholder="Přidejte zprávu pro Adama..."
                 />
               </div>
             )}
           </div>
           <Button className="mt-4 w-full" disabled={uploading}>
-            {uploading ? "Uploading..." : "Send Memory"}
+            {uploading ? "Nahrávám..." : "Odeslat vzpomínku"}
           </Button>
         </form>
       </CardContent>

@@ -8,16 +8,25 @@ export const list = query({
     const memories = await ctx.db.query("memories").order("desc").collect();
     return Promise.all(
       memories.map(async (memory) => {
+        if (
+          memory.fileIds &&
+          Array.isArray(memory.fileIds) &&
+          memory.fileIds.length > 0
+        ) {
+          // Get all file URLs for each fileId
+          const fileUrls = await Promise.all(
+            memory.fileIds.map((fileId) => ctx.storage.getUrl(fileId))
+          );
+          return {
+            ...memory,
+            fileUrls,
+          };
+        }
+        // fallback for old single fileId
         if (memory.fileId) {
           return {
             ...memory,
-            fileUrl: await ctx.storage.getUrl(memory.fileId),
-            fileType:
-              memory.type === "image"
-                ? "image"
-                : memory.type === "video"
-                ? "video"
-                : "file",
+            fileUrls: [await ctx.storage.getUrl(memory.fileId)],
           };
         }
         return memory;
@@ -37,8 +46,9 @@ export const send = mutation({
   args: {
     content: v.string(),
     type: memoryTypes,
-    fileId: v.optional(v.id("_storage")),
-    link: v.optional(v.string()), // Accept link from client
+    fileIds: v.optional(v.array(v.id("_storage"))),
+    fileTypes: v.optional(v.array(v.string())),
+    link: v.optional(v.string()),
     authorName: v.optional(v.string()),
     authorEmail: v.optional(v.string()),
   },
@@ -49,7 +59,8 @@ export const send = mutation({
       authorEmail: identity?.email ?? "Anonymous",
       content: args.content,
       type: args.type,
-      fileId: args.fileId ?? undefined,
+      fileIds: args.fileIds ?? undefined,
+      fileTypes: args.fileTypes ?? undefined,
       link: args.link ?? undefined, // Store link if present
     });
   },

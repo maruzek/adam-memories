@@ -28,9 +28,10 @@ export function Login() {
     return (
       <Card className="w-full max-w-lg mx-auto text-center p-8">
         <CardHeader>
-          <CardTitle>Check your inbox</CardTitle>
+          <CardTitle>Zkontrolujte svou schránku</CardTitle>
           <CardDescription>
-            We've sent a sign-in link to {email}. Please click it to log in.
+            Odeslali jsme odkaz pro přihlášení na {email}. Prosím, klikněte na
+            něj pro přihlášení.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -40,9 +41,10 @@ export function Login() {
   return (
     <Card className="w-full max-w-lg mx-auto text-center p-8">
       <CardHeader>
-        <CardTitle>Share a Memory</CardTitle>
+        <CardTitle>Přihlášení</CardTitle>
         <CardDescription className="mt-2">
-          Enter your email to receive a secure sign-in link. No password needed.
+          Zadejte svůj e-mail a obdržíte bezpečný odkaz pro přihlášení. Žádné
+          heslo není potřeba.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -54,7 +56,7 @@ export function Login() {
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <Button type="submit">Send Sign-In Link</Button>
+          <Button type="submit">Odeslat odkaz pro přihlášení</Button>
         </form>
       </CardContent>
     </Card>

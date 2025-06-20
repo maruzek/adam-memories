@@ -16,7 +16,8 @@ const schema = defineSchema({
     authorEmail: v.string(),
     content: v.string(),
     type: memoryTypes,
-    fileId: v.optional(v.id("_storage")),
+    fileIds: v.optional(v.array(v.id("_storage"))),
+    fileTypes: v.optional(v.array(v.string())),
     link: v.optional(v.string()), // Add link field for embeddable links
   })
     .index("by_authorEmail", ["authorEmail"])
