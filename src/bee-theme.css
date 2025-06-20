@@ -1,0 +1,75 @@
+body {
+  background: linear-gradient(135deg, #fffde7 0%, #ffd600 100%);
+  min-height: 100vh;
+  font-family: "Poppins", "Nunito", "Segoe UI", Arial, sans-serif;
+  color: #222;
+}
+
+h1,
+h2,
+h3 {
+  color: #222;
+  font-family: "Poppins", "Nunito", "Segoe UI", Arial, sans-serif;
+}
+
+.bee-header {
+  background: linear-gradient(90deg, #ffd600 60%, #ffc107 100%);
+  color: #222;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px #ffeb3b44;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.bee-mascot {
+  width: 48px;
+  height: 48px;
+  margin-right: 1rem;
+}
+
+.bee-card {
+  border: 2px solid #ffd600;
+  background: #fffde7;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px #ffd60022;
+}
+
+.bee-btn {
+  background: linear-gradient(90deg, #ffd600 60%, #ffc107 100%);
+  color: #222;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  transition: box-shadow 0.2s;
+}
+
+.bee-btn:hover {
+  box-shadow: 0 2px 8px #ffd60055;
+}
+
+.bee-tabs .shadcn-tabs-trigger[data-state="active"] {
+  background: #ffd600;
+  color: #222;
+}
+
+.bee-input {
+  border: 2px solid #ffd600;
+  background: #fffde7;
+}
+
+.bee-label {
+  color: #ffc107;
+}
+
+.bee-tabs-list {
+  background: #ffd600;
+  color: #222;
+}
+
+.bee-textarea {
+  border: 2px solid #ffd600;
+  background: #fffde7;
+}

@@ -1,0 +1,21 @@
+import { useMutation } from "convex/react";
+import { Button } from "@/components/ui/button";
+
+export function Header({
+  isLoading,
+  isAuthenticated,
+  onLogout,
+}: {
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  onLogout: () => void;
+}) {
+  return (
+    <header className="flex justify-between items-center mb-8">
+      <h1 className="text-3xl font-bold">Memories for Adam</h1>
+      {!isLoading && isAuthenticated && (
+        <Button onClick={onLogout}>Log Out</Button>
+      )}
+    </header>
+  );
+}
