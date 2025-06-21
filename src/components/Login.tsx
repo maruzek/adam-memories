@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { useMutation } from "convex/react";
+import { useConvexAuth } from "convex/react";
 import {
   Card,
   CardHeader,
@@ -10,22 +10,35 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuthActions } from "@convex-dev/auth/react";
-
-const sendMagicLink = "auth:sendMagicLink";
+import { Navigate } from "react-router";
 
 export function Login() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
-  const sendLink = useMutation(sendMagicLink);
   const { signIn } = useAuthActions();
+  const { isLoading, isAuthenticated } = useConvexAuth();
 
   const handleSignIn = (e: FormEvent) => {
     e.preventDefault();
-    // sendLink({ email });
-    // setSent(true);
+    setSent(true);
     const formData = new FormData(e.currentTarget as HTMLFormElement);
     void signIn("resend", formData);
   };
+
+  if (isLoading) {
+    return (
+      <Card className="w-full max-w-lg mx-auto text-center p-8">
+        <CardHeader>
+          <CardTitle>Načítání...</CardTitle>
+          <CardDescription>Prosím, čekejte...</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   if (sent) {
     return (

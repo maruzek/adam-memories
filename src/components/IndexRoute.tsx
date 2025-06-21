@@ -4,21 +4,22 @@ import { MemoryForm } from "./MemoryForm";
 import { ThankYou } from "./ThankYou";
 
 type IndexRouteProps = {
-  setSubmitted: (submitted: boolean) => void;
+  onSuccess: (val: boolean) => void;
   isSubmitted: boolean;
 };
 
-const IndexRoute = ({
-  setSubmitted: onSuccess,
-  isSubmitted,
-}: IndexRouteProps) => {
+const IndexRoute = ({ onSuccess, isSubmitted }: IndexRouteProps) => {
   return (
     <>
       <Unauthenticated>
         <Navigate to="/login" replace />
       </Unauthenticated>
       <Authenticated>
-        {!isSubmitted ? <MemoryForm onSuccess={onSuccess} /> : <ThankYou />}
+        {!isSubmitted ? (
+          <MemoryForm onSuccess={() => onSuccess(true)} />
+        ) : (
+          <ThankYou />
+        )}
       </Authenticated>
     </>
   );

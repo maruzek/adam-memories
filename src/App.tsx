@@ -5,11 +5,18 @@ import { Header } from "@/components/Header";
 import { Login } from "@/components/Login";
 import { MemoryWall } from "@/components/MemoryWall";
 import IndexRoute from "./components/IndexRoute";
+import { useAuthActions } from "@convex-dev/auth/react";
 
 function App() {
   const { isLoading, isAuthenticated } = useConvexAuth();
+  const { signOut } = useAuthActions();
   const [submitted, setSubmitted] = useState(false);
   console.log("isAuth app", isAuthenticated);
+
+  const onLogout = () => {
+    // Handle logout logic here
+    signOut();
+  };
 
   // return (
   //   <Router>
@@ -59,16 +66,13 @@ function App() {
           <Header
             isLoading={isLoading}
             isAuthenticated={isAuthenticated}
-            onLogout={() => {}}
+            onLogout={onLogout}
           />
           <Routes>
             <Route
               path="/"
               element={
-                <IndexRoute
-                  setSubmitted={() => setSubmitted(true)}
-                  isSubmitted={submitted}
-                />
+                <IndexRoute onSuccess={setSubmitted} isSubmitted={submitted} />
               }
             />
             <Route path="/login" element={<Login />} />

@@ -1,11 +1,24 @@
 import { v } from "convex/values";
 import { mutation, query, action } from "./_generated/server";
 import { memoryTypes } from "./schema";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const list = query({
   args: {},
   handler: async (ctx) => {
     const memories = await ctx.db.query("memories").order("desc").collect();
+
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return [];
+    }
+
+    const user = await ctx.db.get(userId);
+
+    if (user?.role !== "admin" || !user || user?.role === null) {
+      return [];
+    }
+
     return Promise.all(
       memories.map(async (memory) => {
         if (
@@ -19,16 +32,16 @@ export const list = query({
           );
           return {
             ...memory,
-            fileUrls,
+            fileUrls: fileUrls.filter((url): url is string => !!url),
           };
         }
-        // fallback for old single fileId
-        if (memory.fileId) {
-          return {
-            ...memory,
-            fileUrls: [await ctx.storage.getUrl(memory.fileId)],
-          };
-        }
+        // // fallback for old single fileId
+        // if (memory.fileId) {
+        //   return {
+        //     ...memory,
+        //     fileUrls: [await ctx.storage.getUrl(memory.fileId)],
+        //   };
+        // }
         return memory;
       })
     );

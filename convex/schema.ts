@@ -29,10 +29,17 @@ const schema = defineSchema({
     providerAccountId: v.optional(v.string()), // <-- make this optional
     secret: v.optional(v.string()),
     userId: v.id("users"),
-    role: v.optional(v.string()),
   })
-    .index("providerAndAccountId", ["provider", "providerAccountId", "role"])
+    .index("providerAndAccountId", ["provider", "providerAccountId"])
     .index("by_providerAccountId", ["providerAccountId"]), // <-- add this line
+  users: defineTable({
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    role: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.float64()),
+  })
+    .index("email", ["email"])
+    .index("by_role", ["role"]),
 });
 
 export default schema;

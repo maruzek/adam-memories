@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import type { Id } from "convex/_generated/dataModel";
 
 type MemoryType = "text" | "upload" | "link";
 
@@ -54,7 +55,11 @@ function resizeImage(
   });
 }
 
-export function MemoryForm({ onSuccess }: { onSuccess: () => void }) {
+type MemoryFormProps = {
+  onSuccess: (val: boolean) => void;
+};
+
+export function MemoryForm({ onSuccess }: MemoryFormProps) {
   const [content, setContent] = useState("");
   const [type, setType] = useState<MemoryType>("text");
   const [files, setFiles] = useState<File[]>([]); // <-- array of files
@@ -62,7 +67,7 @@ export function MemoryForm({ onSuccess }: { onSuccess: () => void }) {
   const [uploading, setUploading] = useState(false);
   const sendMemory = useMutation(api.memories.send);
   const generateUploadUrl = useAction(api.memories.generateUploadUrl);
-  const isAdminUser = useQuery(api.auth.isAdmin);
+  const isAdminUser = useQuery(api.users.isAdmin);
   console.log("isAdminUser", isAdminUser);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,7 +85,7 @@ export function MemoryForm({ onSuccess }: { onSuccess: () => void }) {
       return;
     }
 
-    const fileIds: string[] = [];
+    const fileIds: Id<"_storage">[] = [];
     const fileTypes: string[] = [];
 
     if (type === "upload" && files.length > 0) {
@@ -89,7 +94,11 @@ export function MemoryForm({ onSuccess }: { onSuccess: () => void }) {
         let uploadFile = file;
         if (file.type.startsWith("image/")) {
           // Optimize image before upload
-          uploadFile = await resizeImage(file);
+          const blob = await resizeImage(file);
+          uploadFile = new File([blob], file.name, {
+            type: "image/jpeg",
+            lastModified: file.lastModified,
+          });
         }
         const uploadUrl = await generateUploadUrl();
         const res = await fetch(uploadUrl, {
@@ -99,7 +108,7 @@ export function MemoryForm({ onSuccess }: { onSuccess: () => void }) {
         });
         if (res.ok) {
           const { storageId } = await res.json();
-          fileIds.push(storageId);
+          fileIds.push(storageId as Id<"_storage">);
           fileTypes.push(file.type);
         } else {
           alert("File upload failed");
@@ -125,7 +134,7 @@ export function MemoryForm({ onSuccess }: { onSuccess: () => void }) {
     setContent("");
     setFiles([]);
     setLink("");
-    onSuccess();
+    onSuccess(true);
   };
 
   const getPlaceholder = () => {

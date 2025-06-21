@@ -14,8 +14,9 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useState } from "react";
+import type { Memory } from "@/types/Memory";
 
-export function MemoryCard({ memory }: { memory: any }) {
+export function MemoryCard({ memory }: { memory: Memory }) {
   const [open, setOpen] = useState(false);
 
   // Helper to render all files (images/videos)
@@ -31,7 +32,7 @@ export function MemoryCard({ memory }: { memory: any }) {
       if (type.startsWith("image/")) {
         return (
           <img
-            src={url}
+            src={url ?? ""}
             alt="Memory thumbnail"
             className="rounded-md block w-full cursor-pointer"
             loading="lazy"
@@ -57,7 +58,7 @@ export function MemoryCard({ memory }: { memory: any }) {
             preload="metadata"
             onClick={() => setOpen(true)}
           >
-            <source src={url} type={type} />
+            <source src={url ?? ""} type={type} />
           </video>
         );
       }
@@ -66,45 +67,47 @@ export function MemoryCard({ memory }: { memory: any }) {
     // Show all files (for modal)
     return (
       <div className="flex flex-col gap-3">
-        {fileUrls.map((url: string, idx: number) => {
-          const type = memory.fileTypes[idx] || "";
-          if (type.startsWith("image/")) {
-            return (
-              <img
-                key={url}
-                src={url}
-                alt="Memory"
-                className="rounded-md block w-full"
-                loading="lazy"
-                style={{
-                  display: "block",
-                  width: "100%",
-                  height: "auto",
-                  objectFit: "contain",
-                }}
-              />
-            );
-          } else if (type.startsWith("video/")) {
-            return (
-              <video
-                key={url}
-                controls
-                className="rounded-md block w-full"
-                preload="metadata"
-                style={{
-                  display: "block",
-                  width: "100%",
-                  height: "auto",
-                  objectFit: "contain",
-                }}
-              >
-                <source src={url} type={type} />
-                Your browser does not support the video tag.
-              </video>
-            );
-          }
-          return null;
-        })}
+        {fileUrls
+          .filter((url): url is string => !!url)
+          .map((url: string, idx: number) => {
+            const type = (memory.fileTypes && memory.fileTypes[idx]) || "";
+            if (type.startsWith("image/")) {
+              return (
+                <img
+                  key={url}
+                  src={url}
+                  alt="Memory"
+                  className="rounded-md block w-full"
+                  loading="lazy"
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "auto",
+                    objectFit: "contain",
+                  }}
+                />
+              );
+            } else if (type.startsWith("video/")) {
+              return (
+                <video
+                  key={url}
+                  controls
+                  className="rounded-md block w-full"
+                  preload="metadata"
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "auto",
+                    objectFit: "contain",
+                  }}
+                >
+                  <source src={url} type={type} />
+                  Your browser does not support the video tag.
+                </video>
+              );
+            }
+            return null;
+          })}
       </div>
     );
   };
@@ -213,9 +216,6 @@ export function MemoryCard({ memory }: { memory: any }) {
     if (memory.fileIds && memory.fileTypes && memory.fileIds.length > 0) {
       return renderFiles(false);
     }
-    if (memory.type === "text") {
-      return <p className="whitespace-pre-line">{memory.content}</p>;
-    }
     return null;
   };
 
@@ -232,9 +232,7 @@ export function MemoryCard({ memory }: { memory: any }) {
         }}
       >
         <CardHeader>
-          <CardTitle>
-            {memory.authorName || memory.author || "Anonymní"}
-          </CardTitle>
+          <CardTitle>{memory.authorName || "Anonymní"}</CardTitle>
         </CardHeader>
         <CardContent>
           {memory.content && memory.type !== "text" && (
@@ -276,9 +274,7 @@ export function MemoryCard({ memory }: { memory: any }) {
           className="max-w-4xl w-full h-[80vh] overflow-y-auto"
         >
           <DialogHeader>
-            <DialogTitle>
-              {memory.authorName || memory.author || "Anonymní"}
-            </DialogTitle>
+            <DialogTitle>{memory.authorName || "Anonymní"}</DialogTitle>
             <DialogDescription>
               Sdíleno dne{" "}
               {new Date(memory._creationTime).toLocaleDateString("cs-CZ")}
