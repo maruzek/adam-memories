@@ -2,14 +2,55 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
 import { useState } from "react";
 import { useConvexAuth } from "convex/react";
 import { Header } from "@/components/Header";
-import { MemoryForm } from "@/components/MemoryForm";
-import { ThankYou } from "@/components/ThankYou";
 import { Login } from "@/components/Login";
 import { MemoryWall } from "@/components/MemoryWall";
+import IndexRoute from "./components/IndexRoute";
 
 function App() {
   const { isLoading, isAuthenticated } = useConvexAuth();
   const [submitted, setSubmitted] = useState(false);
+  console.log("isAuth app", isAuthenticated);
+
+  // return (
+  //   <Router>
+  //     <div className="bg-gray-50 min-h-screen p-8">
+  //       <div className="container mx-auto">
+  //         <Header
+  //           isLoading={isLoading}
+  //           isAuthenticated={isAuthenticated}
+  //           onLogout={() => {}}
+  //         />
+  //         <Routes>
+  //           <Route
+  //             path="/"
+  //             element={
+  //               isAuthenticated ? (
+  //                 !submitted ? (
+  //                   <MemoryForm onSuccess={() => setSubmitted(true)} />
+  //                 ) : (
+  //                   <ThankYou />
+  //                 )
+  //               ) : (
+  //                 <Navigate to="/login" replace />
+  //               )
+  //             }
+  //           />
+  //           <Route
+  //             path="/"
+  //             element={
+  //               <Unauthenticated>
+  //                 <Navigate to="/login" replace />
+  //               </Unauthenticated>
+  //             }
+  //           />
+  //           <Route path="/login" element={<Login />} />
+  //           <Route path="/memories" element={<ProtectedMemoryWall />} />
+  //           <Route path="*" element={<Navigate to="/" replace />} />
+  //         </Routes>
+  //       </div>
+  //     </div>
+  //   </Router>
+  // );
 
   return (
     <Router>
@@ -24,11 +65,10 @@ function App() {
             <Route
               path="/"
               element={
-                !submitted ? (
-                  <MemoryForm onSuccess={() => setSubmitted(true)} />
-                ) : (
-                  <ThankYou />
-                )
+                <IndexRoute
+                  setSubmitted={() => setSubmitted(true)}
+                  isSubmitted={submitted}
+                />
               }
             />
             <Route path="/login" element={<Login />} />

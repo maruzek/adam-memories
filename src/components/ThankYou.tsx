@@ -13,7 +13,7 @@ export function ThankYou() {
         <CardTitle>Poděkování</CardTitle>
       </CardHeader>
       <CardContent>
-        <p>Děkujeme za sdílení vaší vzpomínky! Adam si toho moc váží.</p>
+        <p>Děkujeme za sdílení vaší vzpomínky! Moc si toho vážíme.</p>
       </CardContent>
       <CardFooter />
     </Card>

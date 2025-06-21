@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, useAction } from "convex/react";
+import { useMutation, useAction, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import {
   Card,
@@ -62,6 +62,8 @@ export function MemoryForm({ onSuccess }: { onSuccess: () => void }) {
   const [uploading, setUploading] = useState(false);
   const sendMemory = useMutation(api.memories.send);
   const generateUploadUrl = useAction(api.memories.generateUploadUrl);
+  const isAdminUser = useQuery(api.auth.isAdmin);
+  console.log("isAdminUser", isAdminUser);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from "react";
 import { useMutation } from "convex/react";
-import { api } from "../../convex/_generated/api";
 import {
   Card,
   CardHeader,
@@ -10,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useAuthActions } from "@convex-dev/auth/react";
 
 const sendMagicLink = "auth:sendMagicLink";
 
@@ -17,11 +17,14 @@ export function Login() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const sendLink = useMutation(sendMagicLink);
+  const { signIn } = useAuthActions();
 
   const handleSignIn = (e: FormEvent) => {
     e.preventDefault();
-    sendLink({ email });
-    setSent(true);
+    // sendLink({ email });
+    // setSent(true);
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    void signIn("resend", formData);
   };
 
   if (sent) {
@@ -55,8 +58,11 @@ export function Login() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            name="email"
           />
-          <Button type="submit">Odeslat odkaz pro přihlášení</Button>
+          <Button type="submit" className="cursor-pointer">
+            Odeslat odkaz pro přihlášení
+          </Button>
         </form>
       </CardContent>
     </Card>
