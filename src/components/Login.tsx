@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { Navigate } from "react-router";
+// import { api } from "../../convex/_generated/api";
 
 export function Login() {
   const [email, setEmail] = useState("");

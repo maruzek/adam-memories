@@ -39,7 +39,8 @@ const schema = defineSchema({
     emailVerificationTime: v.optional(v.float64()),
   })
     .index("email", ["email"])
-    .index("by_role", ["role"]),
+    .index("by_role", ["role"])
+    .index("name", ["name"]),
 });
 
 export default schema;

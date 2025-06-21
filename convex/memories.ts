@@ -68,8 +68,8 @@ export const send = mutation({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     await ctx.db.insert("memories", {
-      authorName: identity?.name ?? "Anonymous",
-      authorEmail: identity?.email ?? "Anonymous",
+      authorName: args.authorName ?? "Anonymous",
+      authorEmail: args.authorEmail ?? "Anonymous",
       content: args.content,
       type: args.type,
       fileIds: args.fileIds ?? undefined,

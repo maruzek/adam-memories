@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, useAction, useQuery } from "convex/react";
+import { useMutation, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import {
   Card,
@@ -64,11 +64,10 @@ export function MemoryForm({ onSuccess }: MemoryFormProps) {
   const [type, setType] = useState<MemoryType>("text");
   const [files, setFiles] = useState<File[]>([]); // <-- array of files
   const [link, setLink] = useState("");
+  const [authorName, setAuthorName] = useState("");
   const [uploading, setUploading] = useState(false);
   const sendMemory = useMutation(api.memories.send);
   const generateUploadUrl = useAction(api.memories.generateUploadUrl);
-  const isAdminUser = useQuery(api.users.isAdmin);
-  console.log("isAdminUser", isAdminUser);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,12 +122,13 @@ export function MemoryForm({ onSuccess }: MemoryFormProps) {
         fileIds,
         fileTypes,
         link: link || undefined,
+        authorName: authorName || "Anonymous",
       });
     } else {
       await sendMemory({
         content,
-        type: type === "upload" ? "image" : type,
-        link: link || undefined,
+        type: "text",
+        authorName: authorName || "Anonymous",
       });
     }
     setContent("");
@@ -231,6 +231,18 @@ export function MemoryForm({ onSuccess }: MemoryFormProps) {
               </div>
             )}
           </div>
+          <Label htmlFor="authorName" className="mt-4">
+            Vaše jméno (nepovinné)
+          </Label>
+          <Input
+            type="text"
+            name="authorName"
+            placeholder="Vaše jméno"
+            value={authorName}
+            onChange={(e) => setAuthorName(e.target.value)}
+            className="my-2"
+            required
+          />
           <Button className="mt-4 w-full" disabled={uploading}>
             {uploading ? "Nahrávám..." : "Odeslat vzpomínku"}
           </Button>
