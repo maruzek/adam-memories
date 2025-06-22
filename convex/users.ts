@@ -76,9 +76,8 @@ export const getAllUsers = query({
       // If including not verified users, return all users
       result = await ctx.db.query("users").collect();
     }
-    const users = await ctx.db.query("users").collect();
-    if (!users || users.length <= 0) return []; // If no users found, return an empty array
-    return users.map((user) => ({
+    if (!result || result.length <= 0) return []; // If no users found, return an empty array
+    return result.map((user) => ({
       _id: user._id,
       name: user.name,
       email: user.email
