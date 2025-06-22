@@ -66,9 +66,21 @@ export const send = mutation({
     authorEmail: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized: User must be logged in to send memories.");
+    }
+
+    const user = await ctx.db.get(userId);
+
+    let email;
+    if (user) {
+      email = user.email;
+    }
+
     await ctx.db.insert("memories", {
       authorName: args.authorName ?? "Anonymous",
-      authorEmail: args.authorEmail ?? "Anonymous",
+      authorEmail: email ?? "Anonymous",
       content: args.content,
       type: args.type,
       fileIds: args.fileIds ?? undefined,

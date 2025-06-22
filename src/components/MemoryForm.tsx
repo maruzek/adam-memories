@@ -124,6 +124,13 @@ export function MemoryForm({ onSuccess }: MemoryFormProps) {
         link: link || undefined,
         authorName: authorName || "Anonymous",
       });
+    } else if (type === "link") {
+      await sendMemory({
+        content,
+        type: "link",
+        link,
+        authorName: authorName || "Anonymous",
+      });
     } else {
       await sendMemory({
         content,

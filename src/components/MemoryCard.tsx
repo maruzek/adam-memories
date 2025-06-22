@@ -18,6 +18,7 @@ import type { Memory } from "@/types/Memory";
 
 export function MemoryCard({ memory }: { memory: Memory }) {
   const [open, setOpen] = useState(false);
+  let dialogHasMinHeight = false;
 
   // Helper to render all files (images/videos)
   const renderFiles = (thumbOnly = false) => {
@@ -66,7 +67,7 @@ export function MemoryCard({ memory }: { memory: Memory }) {
     }
     // Show all files (for modal)
     return (
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 items-center">
         {fileUrls
           .filter((url): url is string => !!url)
           .map((url: string, idx: number) => {
@@ -77,14 +78,12 @@ export function MemoryCard({ memory }: { memory: Memory }) {
                   key={url}
                   src={url}
                   alt="Memory"
-                  className="rounded-md block w-full"
+                  className="rounded-md block max-h-[80vh]"
                   loading="lazy"
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    height: "auto",
-                    objectFit: "contain",
-                  }}
+                // style={{
+                //   height: "auto",
+                //   objectFit: "contain",
+                // }}
                 />
               );
             } else if (type.startsWith("video/")) {
@@ -92,14 +91,14 @@ export function MemoryCard({ memory }: { memory: Memory }) {
                 <video
                   key={url}
                   controls
-                  className="rounded-md block w-full"
+                  className="rounded-md block max-h-[80vh]"
                   preload="metadata"
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    height: "auto",
-                    objectFit: "contain",
-                  }}
+                // style={{
+                //   display: "block",
+                //   width: "100%",
+                //   height: "auto",
+                //   objectFit: "contain",
+                // }}
                 >
                   <source src={url} type={type} />
                   Your browser does not support the video tag.
@@ -176,6 +175,7 @@ export function MemoryCard({ memory }: { memory: Memory }) {
     if (memory.type === "link" && typeof memory.link === "string") {
       const ytEmbedUrl = getYouTubeEmbedUrl(memory.link);
       if (ytEmbedUrl) {
+        dialogHasMinHeight = true;
         return (
           <iframe
             width="100%"
@@ -184,20 +184,21 @@ export function MemoryCard({ memory }: { memory: Memory }) {
             title="YouTube video player"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            className="rounded-md"
+            className="rounded-md justify-self-center max-w-1/2 mx-auto"
           ></iframe>
         );
       }
       const spotifyEmbedUrl = getSpotifyEmbedUrl(memory.link);
       if (spotifyEmbedUrl) {
+        dialogHasMinHeight = true;
         return (
           <iframe
             src={spotifyEmbedUrl}
-            width="100%"
             height={380}
             frameBorder="0"
             allow="encrypted-media"
             style={{ borderRadius: 8 }}
+            className="w-full max-w-2xl mx-auto"
           />
         );
       }
@@ -271,21 +272,26 @@ export function MemoryCard({ memory }: { memory: Memory }) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           showCloseButton
-          className="max-w-4xl w-full h-[80vh] overflow-y-auto"
+          className="min-w-10/12 w-full max-h-[90vh] overflow-y-auto"
         >
           <DialogHeader>
             <DialogTitle>{memory.authorName || "Anonymní"}</DialogTitle>
             <DialogDescription>
               Sdíleno dne{" "}
               {new Date(memory._creationTime).toLocaleDateString("cs-CZ")}
+              {memory.authorEmail ? ` (${memory.authorEmail})` : ""}
             </DialogDescription>
           </DialogHeader>
           {memory.content && (
-            <div className="mb-2 whitespace-pre-line text-gray-700">
+            <div className="mb-2 whitespace-pre-line">
               {memory.content}
             </div>
           )}
-          {renderModalContent()}
+          {dialogHasMinHeight ? (
+            <div className="min-h-[300px]">
+              {renderModalContent()}
+            </div>
+          ) : renderModalContent()}
         </DialogContent>
       </Dialog>
     </>
