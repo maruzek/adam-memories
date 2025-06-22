@@ -186,7 +186,7 @@ export function MemoryCard({ memory }: { memory: Memory }) {
             title="YouTube video player"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            className="rounded-md justify-self-center max-w-1/2 mx-auto"
+            className="rounded-md justify-self-center max-w-full md:max-w-1/2 mx-auto"
           ></iframe>
         );
       }
