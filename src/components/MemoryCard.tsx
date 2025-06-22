@@ -162,8 +162,10 @@ export function MemoryCard({ memory }: { memory: Memory }) {
     // Fallback for text
     if (memory.type === "text") {
       return (
-        <p className="cursor-pointer" onClick={() => setOpen(true)}>
-          {memory.content}
+        <p className="mb-2 whitespace-pre-line">
+          {memory.content.length > 120
+            ? memory.content.slice(0, 120) + "…"
+            : memory.content}
         </p>
       );
     }
@@ -237,7 +239,11 @@ export function MemoryCard({ memory }: { memory: Memory }) {
         </CardHeader>
         <CardContent>
           {memory.content && memory.type !== "text" && (
-            <p className="mb-2 whitespace-pre-line">{memory.content}</p>
+            <p className="mb-2 whitespace-pre-line">
+              {memory.content.length > 120
+                ? memory.content.slice(0, 120) + "…"
+                : memory.content}
+            </p>
           )}
           <div className="mt-3 relative">
             {renderContent()}

@@ -2,23 +2,22 @@ import { Authenticated, Unauthenticated } from "convex/react";
 import { Navigate } from "react-router";
 import { MemoryForm } from "./MemoryForm";
 import { ThankYou } from "./ThankYou";
+import { useState } from "react";
 
-type IndexRouteProps = {
-  onSuccess: (val: boolean) => void;
-  isSubmitted: boolean;
-};
 
-const IndexRoute = ({ onSuccess, isSubmitted }: IndexRouteProps) => {
+
+const IndexRoute = () => {
+  const [submitted, setSubmitted] = useState(false);
   return (
     <>
       <Unauthenticated>
         <Navigate to="/login" replace />
       </Unauthenticated>
       <Authenticated>
-        {!isSubmitted ? (
-          <MemoryForm onSuccess={() => onSuccess(true)} />
+        {!submitted ? (
+          <MemoryForm setSubmitted={setSubmitted} />
         ) : (
-          <ThankYou />
+          <ThankYou setSubmitted={setSubmitted} />
         )}
       </Authenticated>
     </>

@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
-import { useState } from "react";
 import { useConvexAuth } from "convex/react";
 import { Header } from "@/components/Header";
 import { Login } from "@/components/Login";
@@ -10,7 +9,6 @@ import { useAuthActions } from "@convex-dev/auth/react";
 function App() {
   const { isLoading, isAuthenticated } = useConvexAuth();
   const { signOut } = useAuthActions();
-  const [submitted, setSubmitted] = useState(false);
   console.log("isAuth app", isAuthenticated);
 
   const onLogout = () => {
@@ -72,7 +70,7 @@ function App() {
             <Route
               path="/"
               element={
-                <IndexRoute onSuccess={setSubmitted} isSubmitted={submitted} />
+                <IndexRoute />
               }
             />
             <Route path="/login" element={<Login />} />

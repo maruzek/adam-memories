@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useMutation, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import {
@@ -56,10 +56,10 @@ function resizeImage(
 }
 
 type MemoryFormProps = {
-  onSuccess: (val: boolean) => void;
+  setSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export function MemoryForm({ onSuccess }: MemoryFormProps) {
+export function MemoryForm({ setSubmitted }: MemoryFormProps) {
   const [content, setContent] = useState("");
   const [type, setType] = useState<MemoryType>("text");
   const [files, setFiles] = useState<File[]>([]); // <-- array of files
@@ -141,7 +141,8 @@ export function MemoryForm({ onSuccess }: MemoryFormProps) {
     setContent("");
     setFiles([]);
     setLink("");
-    onSuccess(true);
+    // onSuccess(true);
+    setSubmitted?.(true);
   };
 
   const getPlaceholder = () => {
