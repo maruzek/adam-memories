@@ -4,10 +4,8 @@ import { memoryTypes } from "./schema";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const list = query({
-  args: {},
-  handler: async (ctx) => {
-    const memories = await ctx.db.query("memories").order("desc").collect();
-
+  args: { user: v.optional(v.string()) },
+  handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
       return [];
@@ -16,6 +14,22 @@ export const list = query({
     const user = await ctx.db.get(userId);
 
     if (user?.role !== "admin" || !user || user?.role === null) {
+      return [];
+    }
+
+    let memories;
+
+    if (args.user) {
+      memories = await ctx.db
+        .query("memories")
+        .filter((q) => q.eq(q.field("authorEmail"), args.user))
+        .order("desc")
+        .collect();
+    } else {
+    memories = await ctx.db.query("memories").order("desc").collect();
+    }
+
+    if (!memories || memories.length === 0) {
       return [];
     }
 

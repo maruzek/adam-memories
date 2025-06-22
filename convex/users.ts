@@ -59,3 +59,29 @@ export const me = query({
     return await ctx.db.get(userId); // Get the current user by ID
   },
 });
+
+export const getAllUsers = query({
+  args: { includeNotVerified: v.optional(v.boolean()) },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return []; // If userId is not found, return an empty array
+    let result;
+    if (args.includeNotVerified == false || args.includeNotVerified === undefined) {
+      // If not including not verified users, filter out those with null email
+      result = await ctx.db
+        .query("users")
+        .filter((q) => q.and(q.not(q.eq("emailVerificationTime", null))))
+        .collect();
+    } else {
+      // If including not verified users, return all users
+      result = await ctx.db.query("users").collect();
+    }
+    const users = await ctx.db.query("users").collect();
+    if (!users || users.length <= 0) return []; // If no users found, return an empty array
+    return users.map((user) => ({
+      _id: user._id,
+      name: user.name,
+      email: user.email
+    }));
+  }
+});
